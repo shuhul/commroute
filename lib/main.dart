@@ -10,38 +10,40 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Commroute',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
       home: const HomeScreen(),
     );
   }
 }
 
+class Person {
+  late String name, grade, email, phoneNumber, address, password;
+  Person(this.name, this.grade, this.email, this.phoneNumber, this.address, this.password);
+}
+
 Person currentUser = Person('Bobby', '12', 'bobbyfred@gmail.com', '239-242-6477', '2489 Trestle Lane', 'bobthenoob');
 
-Padding getForm(text, control){
+Padding getForm(text, Function(String text) code){
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 72, vertical: 16),
-    child: TextFormField(controller: control, decoration: InputDecoration( border: const UnderlineInputBorder(), labelText: text))
+    child: TextField(onChanged: (text) { code(text); }, decoration: InputDecoration( border: const UnderlineInputBorder(), labelText: text))
   );
 }
 
-Padding getExtendedButton(context, text, Function() code, widget){
-  code();
-  return getButton(context, text, widget);
+void push(context, widget){
+  Navigator.push(context, MaterialPageRoute(builder: (context) => widget));
 }
 
 Padding getBareButton(context, text, Function() code){
   return Padding(padding: const EdgeInsets.all(16), child: ElevatedButton(onPressed: code, child: Text(text)));
 }
 
-Function() push(context, widget){
-  return () => Navigator.push(context, MaterialPageRoute(builder: (context) => widget));
+Padding getExtendedButton(context, text, Function() code, widget){
+  return getBareButton(context, text, (){code(); push(context, widget);});
 }
 
 Padding getButton(context, text, widget){
-  return getBareButton(context, text, push(context, widget));
+  return getBareButton(context, text, () => push(context, widget));
 }
 
 Scaffold getScaffold(titleText, widgets){
@@ -52,9 +54,7 @@ Scaffold getBareScaffold(titleText, widget) {
   return Scaffold(appBar: AppBar(title: Center(child: Text(titleText)),), body: Center(child: widget));
 }
 
-Text getText(text){
-  return Text(text);
-}
+Text getText(text){ return Text(text); }
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -62,39 +62,41 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return getScaffold('Commroute', [
         getButton(context, 'Login To Existing Account', LoginScreen()),
-        getButton(context, 'Create An Account', CreateAccountScreen())
+        getButton(context, 'Create An Account', const CreateAccountScreen())
     ]);
   }
 }
 
 class CreateAccountScreen extends StatelessWidget {
-  CreateAccountScreen({super.key});
-  final nameC = TextEditingController(); final gradeC = TextEditingController(); final emailC = TextEditingController();
-  final phoneC = TextEditingController(); final addressC = TextEditingController(); final passwordC = TextEditingController();
+  const CreateAccountScreen({super.key});
   @override
   Widget build(BuildContext context) {
+    String name = "", grade = "", email = "", phone = "", address = "", password = "";
     return getScaffold('Create Your Account', [
-      getForm('Full Name', nameC),
-      getForm('Grade', gradeC),
-      getForm('Email', emailC),
-      getForm('Phone Number', phoneC),
-      getForm('Home Address', addressC),
-      getForm('Password', passwordC),
-      // DOESNT WORK FIX
-      getExtendedButton(context, 'Done', () => {currentUser = Person(nameC.text, gradeC.text, emailC.text, phoneC.text, addressC.text, passwordC.text)}, const HomeScreen())
+      getForm('Full Name', (text) => name = text),
+      getForm('Grade', (text) => grade = text),
+      getForm('Email', (text) => email = text),
+      getForm('Phone Number', (text) => phone = text),
+      getForm('Home Address', (text) => address = text),
+      getForm('Password', (text) => password = text),
+      getExtendedButton(context, 'Done', () => {currentUser = Person(name, grade, email, phone, address, password)}, const HomeScreen())
     ]);
   }
 }
 
-class LoginScreen extends StatelessWidget {
-  LoginScreen({super.key});
-  final nameC = TextEditingController(); final passC = TextEditingController();
+class LoginScreen extends StatelessWidget{
+  const LoginScreen({super.key});
   @override
   Widget build(BuildContext context) {
+    String name = "", password = "";
     return getScaffold('Enter Your Name And Password', [
-      getForm('First Name', nameC),
-      getForm('Password', passC),
-      getExtendedButton(context, 'Log In', () => {if(nameC.text == currentUser.name && passC.text == currentUser.password){ print('Login Successful')}}, const MatchesScreen())
+      getForm('First Name', (text) => name = text),
+      getForm('Password', (text) => password = text),
+      getBareButton(context, 'Log In', () => {
+        if(name == currentUser.name && password == currentUser.password || true){
+          push(context, const MatchesScreen())
+        }
+      })
     ]);
   }
 }
@@ -103,17 +105,17 @@ class MatchesScreen extends StatelessWidget {
   const MatchesScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    return getBareScaffold('Choose A Candidate', const Padding(padding: EdgeInsets.all(16), child: RandomWords()));
+    return getBareScaffold('Choose A Candidate', const Padding(padding: EdgeInsets.all(16), child: Matches()));
   }
 }
 
-class RandomWords extends StatefulWidget {
-  const RandomWords({super.key});
+class Matches extends StatefulWidget {
+  const Matches({super.key});
   @override
-  State<RandomWords> createState() => _RandomWordsState();
+  State<Matches> createState() => _MatchesState();
 }
 
-class _RandomWordsState extends State<RandomWords> {
+class _MatchesState extends State<Matches> {
   final _suggestions = <Person>[
     Person('John Doe', '12', 'john.doe@gmail.com', '444-323-5594', '1234 Rocket Way', 'yessir24'),
     Person('Kyle Kleckner', '10', 'kyleisawesome@outlook.com', '131-213-3490', '1385 Dylatov Road', 'iml0st'),
@@ -140,18 +142,12 @@ class _RandomWordsState extends State<RandomWords> {
   }
 }
 
-class Person {
-  late String name, grade, email, phoneNumber, address, password;
-  Person(this.name, this.grade, this.email, this.phoneNumber, this.address, this.password);
-}
-
-
 class ProposeScreen extends StatelessWidget {
   final Person person;
   const ProposeScreen({super.key, required this.person});
   @override
   Widget build(BuildContext context) {
-    return getScaffold('Accept Carpool?', [
+    return getScaffold('Accept Candidate?', [
       getText('Name: ${person.name}')
     ]);
   }
