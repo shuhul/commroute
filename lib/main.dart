@@ -54,7 +54,7 @@ Scaffold getBareScaffold(titleText, widget) {
   return Scaffold(appBar: AppBar(title: Center(child: Text(titleText)),), body: Center(child: widget));
 }
 
-Text getText(text){ return Text(text); }
+Padding getText(text, size){ return Padding(padding: const EdgeInsets.all(16), child: Text(text, style: TextStyle(fontSize: size))); }
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -93,6 +93,7 @@ class LoginScreen extends StatelessWidget{
       getForm('First Name', (text) => name = text),
       getForm('Password', (text) => password = text),
       getBareButton(context, 'Log In', () => {
+        // REMOVE TRUE
         if(name == currentUser.name && password == currentUser.password || true){
           push(context, const MatchesScreen())
         }
@@ -121,7 +122,6 @@ class _MatchesState extends State<Matches> {
     Person('Kyle Kleckner', '10', 'kyleisawesome@outlook.com', '131-213-3490', '1385 Dylatov Road', 'iml0st'),
     Person('Your Mom', '11', 'alex2005@gmail.com', '408-886-0345', '2094 Park Court', 'whynotthis')
   ];
-  final _biggerFont = const TextStyle(fontSize: 18);
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
@@ -130,13 +130,7 @@ class _MatchesState extends State<Matches> {
       itemBuilder: (context, i) {
         if (i.isOdd) return const Divider();
         final Person current = _suggestions[i ~/ 2];
-        return ListTile(
-          title: Text(
-            current.name,
-            style: _biggerFont,
-          ),
-          trailing: getButton(context, 'View', ProposeScreen(person: current))
-        );
+        return ListTile(title: getText(current.name, 18), trailing: getButton(context, 'View', ProposeScreen(person: current)));
       },
     );
   }
@@ -148,7 +142,29 @@ class ProposeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return getScaffold('Accept Candidate?', [
-      getText('Name: ${person.name}')
+      getText('Name: ${person.name}', 16),
+      getText('Grade: ${person.grade}', 16),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+        getButton(context, 'Accept', ConfirmedScreen(person: person)),
+        getButton(context, 'Decline', const MatchesScreen())
+      ])
+    ]);
+  }
+}
+
+
+class ConfirmedScreen extends StatelessWidget {
+  final Person person;
+  const ConfirmedScreen({super.key, required this.person});
+  @override
+  Widget build(BuildContext context) {
+    return getScaffold('Confirmed', [
+      getText('Name: ${person.name}', 16),
+      getText('Grade: ${person.grade}', 16),
+      getText('Email: ${person.email}', 16),
+      getText('Phone: ${person.phoneNumber}', 16),
+      getText('Address: ${person.address}', 16),
+      getButton(context, 'Cancel', const MatchesScreen())
     ]);
   }
 }
