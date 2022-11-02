@@ -1,8 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'locations.dart' as locations;
 
 void main() {
   runApp(const MyApp());
 }
+
+class MyApp2 extends StatefulWidget {
+  const MyApp2({super.key});
+
+  @override
+  State<MyApp2> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp2> {
+  final Map<String, Marker> _markers = {};
+  Future<void> _onMapCreated(GoogleMapController controller) async {
+    final googleOffices = await locations.getGoogleOffices();
+    setState(() {
+      _markers.clear();
+      for (final office in googleOffices.offices) {
+        final marker = Marker(
+          markerId: MarkerId(office.name),
+          position: LatLng(office.lat, office.lng),
+          infoWindow: InfoWindow(
+            title: office.name,
+            snippet: office.address,
+          ),
+        );
+        _markers[office.name] = marker;
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Google Office Locations'),
+          backgroundColor: Colors.green[700],
+        ),
+        body: GoogleMap(
+          onMapCreated: _onMapCreated,
+          initialCameraPosition: const CameraPosition(
+            target: LatLng(0, 0),
+            zoom: 2,
+          ),
+          markers: _markers.values.toSet(),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -18,11 +73,11 @@ class MyApp extends StatelessWidget {
 }
 
 class Person {
-  late String name, grade, email, phoneNumber, address, password, startTime, schoolAddress;
-  Person(this.name, this.grade, this.email, this.phoneNumber, this.address, this.schoolAddress, this.startTime, this.password);
+  late String name, grade, email, phoneNumber, address, password, startTime;
+  Person(this.name, this.grade, this.email, this.phoneNumber, this.address, this.startTime, this.password);
 }
 
-Person currentUser = Person('Bobby', '12', 'bobbyfred@gmail.com', '239-242-6477', '2489 Trestle Lane', '2398 Bohgr Fiji',  '8:00',  'bobthenoob');
+Person currentUser = Person('Bobby', '12', 'bobbyfred@gmail.com', '239-242-6477', '2489 Trestle Lane',  '8:00',  'bobthenoob');
 
 Padding getForm(text, Function(String text) code){
   return Padding(
@@ -54,6 +109,10 @@ Padding getButton(context, text, widget){
   return getBareButton(context, text, () => push(context, widget));
 }
 
+Scaffold getScrollableScaffold(titleText, widgets){
+  return getBareScaffold(titleText, ListView(children: widgets));
+}
+
 Scaffold getScaffold(titleText, widgets){
   return getBareScaffold(titleText, Column( mainAxisAlignment: MainAxisAlignment.center, children: widgets));
 }
@@ -80,16 +139,15 @@ class CreateAccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     String name = "", grade = "", email = "", phone = "", address = "", school = "",  start = "",  password = "";
-    return getScaffold('Create Your Account', [
+    return getScrollableScaffold('Create Your Account', [
       getForm('Full Name', (text) => name = text),
       getForm('Grade', (text) => grade = text),
       getForm('Email', (text) => email = text),
       getForm('Phone Number', (text) => phone = text),
       getForm('Home Address', (text) => address = text),
-      getForm('School Address', (text) => school = text),
       getForm('Start Time', (text) => start = text),
       getFormPassword('Password', (text) => password = text),
-      getExtendedButton(context, 'Done', () => {currentUser = Person(name, grade, email, phone, address, school, start, password)}, const HomeScreen())
+      Column(children: [getExtendedButton(context, 'Done', () => {currentUser = Person(name, grade, email, phone, address, start, password)}, const HomeScreen())])
     ]);
   }
 }
@@ -129,9 +187,9 @@ class Matches extends StatefulWidget {
 class _MatchesState extends State<Matches> {
   final _suggestions = <Person>[
     // Person('Shuhul Mujoo', '12', 'example@gmail.com', '123-456-7891', '3892 Red Way', '8930 Water Park',  '8:15',  'bobthenoob'),
-    Person('John Doe', '12', 'john.doe@gmail.com', '444-323-5594', '1234 Rocket Way', '2398 Bohr Road',  '8:15',  'yessir24'),
-    Person('Kyle Smith', '10', 'kyleisawesome@outlook.com', '131-213-3490', '1385 Dylatov Road', '2398 Bohr Road',  '10:00',  'iml0st'),
-    Person('Abishek Kumar', '11', 'thewiser2005@yahoo.com', '408-886-0345', '2094 Park Court', '2398 Bohr Road',  '8:00',  'whynotthis')
+    Person('John Doe', '12', 'john.doe@gmail.com', '444-323-5594', '1234 Rocket Way',  '8:15',  'yessir24'),
+    Person('Kyle Smith', '10', 'kyleisawesome@outlook.com', '131-213-3490', '1385 Dylatov Road',  '10:00',  'iml0st'),
+    Person('Abishek Kumar', '11', 'thewiser2005@yahoo.com', '408-886-0345', '2094 Park Court',   '8:00',  'whynotthis')
   ];
   @override
   Widget build(BuildContext context) {
@@ -150,7 +208,7 @@ class _MatchesState extends State<Matches> {
 class ProposeScreen extends StatelessWidget {
   final Person person;
   const ProposeScreen({super.key, required this.person});
-  final bool mode = true;
+  final bool mode = false;
   @override
   Widget build(BuildContext context) {
     return getScaffold(mode ? 'Accept Invitation?': 'Request Candidate?', [
