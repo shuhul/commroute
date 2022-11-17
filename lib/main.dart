@@ -72,6 +72,10 @@ class MyApp extends StatelessWidget {
   }
 }
 
+
+// Change address to zone selection (locations)
+// Add username
+
 class Person {
   late String name, grade, email, phoneNumber, address, password, startTime;
   Person(this.name, this.grade, this.email, this.phoneNumber, this.address, this.startTime, this.password);
