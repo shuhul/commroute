@@ -5,58 +5,70 @@ import 'locations.dart' as locations;
 void main() {
   runApp(const MyApp());
 }
-
-class MyApp2 extends StatefulWidget {
-  const MyApp2({super.key});
-
-  @override
-  State<MyApp2> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp2> {
-  final Map<String, Marker> _markers = {};
-  Future<void> _onMapCreated(GoogleMapController controller) async {
-    final googleOffices = await locations.getGoogleOffices();
-    setState(() {
-      _markers.clear();
-      for (final office in googleOffices.offices) {
-        final marker = Marker(
-          markerId: MarkerId(office.name),
-          position: LatLng(office.lat, office.lng),
-          infoWindow: InfoWindow(
-            title: office.name,
-            snippet: office.address,
-          ),
-        );
-        _markers[office.name] = marker;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Google Office Locations'),
-          backgroundColor: Colors.green[700],
-        ),
-        body: GoogleMap(
-          onMapCreated: _onMapCreated,
-          initialCameraPosition: const CameraPosition(
-            target: LatLng(0, 0),
-            zoom: 2,
-          ),
-          markers: _markers.values.toSet(),
-        ),
-      ),
-    );
-  }
-}
-
-
+//
+// class MyApp2 extends StatefulWidget {
+//   const MyApp2({super.key});
+//
+//   @override
+//   State<MyApp2> createState() => _MyAppState();
+// }
+//
+// class _MyAppState extends State<MyApp2> {
+//   final Map<String, Marker> _markers = {};
+//   Future<void> _onMapCreated(GoogleMapController controller) async {
+//     final googleOffices = await locations.getGoogleOffices();
+//     setState(() {
+//       _markers.clear();
+//       for (final office in googleOffices.offices) {
+//         final marker = Marker(
+//           markerId: MarkerId(office.name),
+//           position: LatLng(office.lat, office.lng),
+//           infoWindow: InfoWindow(
+//             title: office.name,
+//             snippet: office.address,
+//           ),
+//         );
+//         _markers[office.name] = marker;
+//       }
+//     });
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       home: Scaffold(
+//         appBar: AppBar(
+//           title: const Text('Google Office Locations'),
+//           backgroundColor: Colors.green[700],
+//         ),
+//         body: GoogleMap(
+//           onMapCreated: _onMapCreated,
+//           initialCameraPosition: const CameraPosition(
+//             target: LatLng(0, 0),
+//             zoom: 2,
+//           ),
+//           markers: _markers.values.toSet(),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 
+
+const Map<int, Color> color =
+{
+  50:Color.fromRGBO(4,131,184, .1),
+  100:Color.fromRGBO(4,131,184, .2),
+  200:Color.fromRGBO(4,131,184, .3),
+  300:Color.fromRGBO(4,131,184, .4),
+  400:Color.fromRGBO(4,131,184, .5),
+  500:Color.fromRGBO(4,131,184, .6),
+  600:Color.fromRGBO(4,131,184, .7),
+  700:Color.fromRGBO(4,131,184, .8),
+  800:Color.fromRGBO(4,131,184, .9),
+  900:Color.fromRGBO(4,131,184, 1),
+};
 
 
 class MyApp extends StatelessWidget {
@@ -66,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Commroute',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(primarySwatch: MaterialColor(0xff26833B, color)),
       home: const HomeScreen(),
     );
   }
